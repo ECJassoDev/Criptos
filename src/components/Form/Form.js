@@ -1,53 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View } from 'react-native'
-import { Picker } from '@react-native-community/picker';
-import styles from './styles';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Text, View, TouchableHighlight, Alert } from "react-native";
+import { Picker } from "@react-native-community/picker";
+import styles from "./styles";
+import axios from "axios";
 
-const Form = () => {
+const Form = ({
+  coin,
+  selectedCrypto,
+  setCoinValue,
+  setSelectedCryptoValue,
+  setExecuteRequest,
+}) => {
+  const [cryptos, setCryptos] = useState([]);
 
-    const [coin, setCoin] = useState('');
-    const [crypto, setCrypto] = useState('');
+  const showAlert = () => {
+    Alert.alert("Error", "Ambos campos son obilgatorios", [{ text: "Ok" }]);
+  };
 
-    const setCoinValue = (value) => {
-        setCoin(value);
-        console.log(value)
-    };
+  const onSubmit = () => {
+    if (coin === "" || selectedCrypto === "") {
+      showAlert();
+      return;
+    } else {
+      setExecuteRequest(true);
+    }
+  };
 
-    useEffect(() => {
-        const apiUrl = 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR';
-        const loadData = async () => {
-            try {
-                const response = await axios.get(apiUrl);
-                console.log(response);
-            } catch (error) {
-                console.error(new Error('Api Request'));
-            }
-        }
-        loadData();
-    }, [])
+  const apiUrl =
+    "https://min-api.cryptocompare.com/data/top/mktcapfull?limit=10&tsym=USD";
+  const loadData = async () => {
+    try {
+      const response = await axios.get(apiUrl);
+      setCryptos([...response.data.Data]);
+      console.log(response.data.Data);
+    } catch (error) {
+      console.error(new Error("Api Request"));
+    }
+  };
 
-    return (
-        <>
-            <View>
-                <Text style={styles.label}>Moneda</Text>
-                <Picker
-                    style={styles.picker}
-                    onValueChange={(value) => setCoinValue(value)}
-                    selectedValue={coin}
-                >
-                    <Picker.Item label="Selecciona" value="" />
-                    <Picker.Item label="Dollar USD" value="USD" />
-                    <Picker.Item label="Peso MXN" value="MXN" />
-                    <Picker.Item label="Euro EUR" value="EUR" />
-                    <Picker.Item label="Libra Esterlina GBP" value="GBP" />
-                </Picker>
+  useEffect(() => {
+    loadData();
+  }, []);
 
-                <Text style={styles.label}>Criptomoneda</Text>
-            </View>
-        </>
-    );
+  return (
+    <>
+      <View>
+        <Text style={styles.label}> {"Moneda"} </Text>
+        <Picker
+          style={styles.picker}
+          onValueChange={(value) => setCoinValue(value)}
+          selectedValue={coin}
+          style={styles.pickerItem}
+        >
+          <Picker.Item label="Selecciona" value="" />
+          <Picker.Item label="Dollar USD" value="USD" />
+          <Picker.Item label="Peso MXN" value="MXN" />
+          <Picker.Item label="Euro EUR" value="EUR" />
+          <Picker.Item label="Libra Esterlina GBP" value="GBP" />
+        </Picker>
+        <Text style={styles.label}> {"Criptomoneda"} </Text>
+        <Picker
+          style={styles.picker}
+          onValueChange={(value) => setSelectedCryptoValue(value)}
+          selectedValue={selectedCrypto}
+          style={styles.pickerItem}
+        >
+          <Picker.Item label="Selecciona" value="" />
+          {cryptos.map((item) => (
+            <Picker.Item
+              key={item.CoinInfo.Internal}
+              label={item.CoinInfo.FullName}
+              value={item.CoinInfo.Name}
+            />
+          ))}
+        </Picker>
+        <TouchableHighlight onPress={onSubmit} style={styles.submitButton}>
+          <Text style={styles.submitButtonText}>{"Cotizar"}</Text>
+        </TouchableHighlight>
+      </View>
+    </>
+  );
 };
-
 
 export default Form;
