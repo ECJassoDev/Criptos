@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Image, View, Text, ScrollView } from "react-native";
+import { StyleSheet, Image, View, ActivityIndicator, ScrollView } from "react-native";
 import Header from "./src/components/Header";
 import Form from "./src/components/Form";
 import axios from "axios";
+import Contization from "./src/components/Cotization/Cotization";
 
 const App = () => {
   const [coin, setCoin] = useState("");
   const [selectedCrypto, setSelectedCrypto] = useState("");
   const [executeRequest, setExecuteRequest] = useState(false);
   const [cotization, setCotization] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const setCoinValue = (value) => setCoin(value);
   const setSelectedCryptoValue = (value) => setSelectedCrypto(value);
@@ -16,15 +18,19 @@ const App = () => {
   const getPrice = async (url) => {
     try {
       const response = await axios.get(url);
-      console.log(response.data.DISPLAY[selectedCrypto][coin]);
       const {
         PRICE,
         LASTUPDATE,
         CHANGE24HOUR,
         CHANGEDAY,
+        HIGHDAY,
+        LOWDAY,
       } = response.data.DISPLAY[selectedCrypto][coin];
-      setCotization({ PRICE, LASTUPDATE, CHANGE24HOUR, CHANGEDAY });
+      setCotization({
+        PRICE, LASTUPDATE, CHANGE24HOUR, CHANGEDAY, HIGHDAY, LOWDAY,
+      });
       setExecuteRequest(false);
+      setLoading(false);
     } catch (error) {
       console.error(new Error(error));
     }
@@ -33,6 +39,7 @@ const App = () => {
     if (executeRequest) {
       const URL = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${selectedCrypto}&tsyms=${coin}`;
       getPrice(URL);
+      setLoading(true);
     }
   }, [executeRequest]);
 
@@ -52,12 +59,9 @@ const App = () => {
             setSelectedCryptoValue={setSelectedCryptoValue}
             setExecuteRequest={setExecuteRequest}
           />
-          {Object.keys(cotization).map((key) => (
-            <>
-              <Text>{key}</Text>
-              <Text>{cotization[key]}</Text>
-            </>
-          ))}
+        </View>
+        <View style={{ marginTop: 20 }}>
+          {loading ? (<ActivityIndicator size="large" color="#5E49E2" />) : (<Contization data={cotization} />)}
         </View>
       </ScrollView>
     </>
@@ -73,6 +77,9 @@ const styles = StyleSheet.create({
   formContainer: {
     marginHorizontal: "2.5%",
   },
+  span: {},
+  textLabel: {}
+
 });
 
 export default App;

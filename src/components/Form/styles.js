@@ -4,14 +4,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: "Lato-Black",
     fontSize: 22,
-    marginVertical: 25,
+    marginVertical: 15,
     marginHorizontal: "2.5%",
   },
   picker: {
     marginBottom: 5,
   },
   pickerItem: {
-    height: 80,
+    height: 50,
   },
   submitButton: {
     backgroundColor: "#5E49E2",
